@@ -1,0 +1,189 @@
+---
+title: "Simple 2018 FIFA World Cup forecasting"
+author: "Edana Merchan"
+date: "December, 2014"
+output: html_document
+---
+
+Summary
+------------------
+
+ The aim of this project is to predict which countries are going to participate in the 2018 FIFA World Cup. To simplify the problem we are going to consider several assumptions:
+ 
+- Data collected from statistics of the 20 world cups only. Preliminary rounds should be consider to produce a better model but this surpases the aim of this project.
+- As is done in real live we are going to give points for each game played. Winner = 3 points, Loser = 0 points and 1 point to each team if tied.
+- The clasification spots have changed over time we are going to consider  32 teams in the clasification from the 6 different regions. 
+
+```{r}
+data<-read.csv("/Users/edana/Hudl/fifadata/cup_stats_full.csv",stringsAsFactors = FALSE)
+
+#Wrong values
+data$region[25] = "Asia"
+data$region[2] = "N/C.America"
+
+data_africa = data[data$region == "Africa",]
+data_asia = data[data$region == "Asia",]
+data_europe = data[data$region == "Europe",]
+data_ncAmerica = data[data$region == "N/C.America",]
+data_oceania = data[data$region == "Oceania",]
+data_sAmerica = data[data$region == "S.America",]
+
+#Clasification table
+regions <- unique(data$region)
+regions <- regions[order(regions)]
+number_spots <- c(5,4.5,13,3.5,0.5,4.5)
+spots_df <- data.frame(regions,number_spots)
+print(spots_df)
+```
+
+You can also embed plots, for example:
+
+```{r, echo=FALSE}
+library(ggplot2)
+#General plot by region
+qplot(editions,points, data = data,  col = region)
+```
+
+Note that the `echo = FALSE` parameter was added to the code chunk to prevent printing of the R code that generated the plot.
+
+Analysis per region: Africa
+--------------------------------------------
+```{r, echo=FALSE}
+
+library(plyr)
+```
+
+```{r}
+#Analysis Africa
+cluster_africa <- data.frame(data_africa[2],data_africa[3],data_africa[4],data_africa[5])
+kmeans.result <- kmeans(cluster_africa, 2)
+cluster_africa = cbind(data_africa$country, cluster_africa)
+colnames(cluster_africa)[1] <- "country"
+cluster_africa <- arrange(cluster_africa,desc(editions),desc(points))
+teams_2018 = cluster_africa[1:floor(spots_df$number_spots[spots_df$regions == "Africa"]),]  
+qplot(editions,points, data = data_africa, col = kmeans.result$cluster) +
+    stat_smooth(method="lm", se=TRUE)
+
+```
+
+
+Analysis per region: Asia
+--------------------------------------------
+```{r}
+#Analysis Asia
+cluster_asia <- data.frame(data_asia[2],data_asia[3],data_asia[4],data_asia[5])
+kmeans.result <- kmeans(cluster_asia, 2)
+cluster_asia = cbind(data_asia$country,cluster_asia)
+colnames(cluster_asia)[1] <- "country"
+cluster_asia <- arrange(cluster_asia,desc(editions),desc(points))
+teams_2018 = rbind(teams_2018, 
+                   cluster_asia[1:floor(spots_df$number_spots[spots_df$regions == "Asia"]),])
+qplot(editions,points, data = data_asia, col = kmeans.result$cluster) +
+    stat_smooth(method="lm", se=TRUE)
+```
+
+Analysis per region: Europe
+--------------------------------------------
+```{r}
+#Analysis Europe
+data_europe <- data_europe[!(data_europe$country=="FRG"),]
+data_europe <- data_europe[!(data_europe$country=="GDR"),]
+data_europe <- data_europe[!(data_europe$country=="Yugoslavia"),]
+data_europe <- data_europe[!(data_europe$country=="Czechoslovakia"),]
+data_europe <- data_europe[!(data_europe$country=="Soviet Union"),]
+cluster_europe <- data.frame(data_europe[2],data_europe[3],data_europe[4],data_europe[5])
+kmeans.result <- kmeans(cluster_europe, 3)
+cluster_europe = cbind(data_europe$country,cluster_europe)
+colnames(cluster_europe)[1] <- "country"
+cluster_europe <- arrange(cluster_europe,desc(editions),desc(points))
+teams_2018 = rbind(teams_2018, 
+                   cluster_europe[1:floor(spots_df$number_spots[spots_df$regions == "Europe"]),])
+qplot(editions,points, data = data_europe, col = kmeans.result$cluster) +
+    stat_smooth(method="lm", se=TRUE)
+```
+
+
+Analysis per region: North, Central America and the Caribean
+--------------------------------------------
+```{r}
+#Analysis N/C.America
+cluster_ncAmerica <- data.frame(data_ncAmerica[2],data_ncAmerica[3],
+                                data_ncAmerica[4],data_ncAmerica[5])
+kmeans.result <- kmeans(cluster_ncAmerica, 2)
+cluster_ncAmerica = cbind(data_ncAmerica$country,cluster_ncAmerica)
+colnames(cluster_ncAmerica)[1] <- "country"
+cluster_ncAmerica <- arrange(cluster_ncAmerica,desc(editions),desc(points))
+teams_2018 = rbind(teams_2018, 
+                   cluster_ncAmerica[1:floor(spots_df$number_spots[spots_df$regions == "N/C.America"]),])
+qplot(editions,points, data = data_ncAmerica, col = kmeans.result$cluster) +
+    stat_smooth(method="lm", se=TRUE)
+```
+
+
+Analysis per region: South America
+--------------------------------------------
+```{r}
+#Analysis S.America
+cluster_sAmerica <- data.frame(data_sAmerica[2],data_sAmerica[3],
+                               data_sAmerica[4],data_sAmerica[5])
+kmeans.result <- kmeans(cluster_sAmerica, 2)
+cluster_sAmerica = cbind(data_sAmerica$country,cluster_sAmerica)
+colnames(cluster_sAmerica)[1] <- "country"
+cluster_sAmerica <- arrange(cluster_sAmerica,desc(editions),desc(points))
+teams_2018 = rbind(teams_2018, 
+                   cluster_sAmerica[1:floor(spots_df$number_spots[spots_df$regions == "S.America"]),])
+qplot(editions,points, data = data_sAmerica, col = kmeans.result$cluster) +
+    stat_smooth(method="lm", se=TRUE)
+```
+
+
+Best teams selection
+-------------------------------------------
+
+```{r}
+#Last teams
+oceania <- data.frame(data_oceania[1],data_oceania[2],data_oceania[3],
+                      data_oceania[4],data_oceania[5])
+last_teams =  cluster_asia[5,]
+last_teams =  rbind(last_teams,cluster_ncAmerica[4,])
+last_teams =  rbind(last_teams,oceania)
+last_teams =  rbind(last_teams,cluster_sAmerica[5,])
+last_teams = arrange(last_teams,desc(editions),desc(points))
+teams_2018 = rbind(teams_2018,last_teams[1:2,])
+
+host <- data.frame("Russia",data[35,2],data[35,3],data[35,4],data[35,5])
+colnames(host)[1] <- "country"
+colnames(host)[2] <- "points"
+colnames(host)[3] <- "gf"
+colnames(host)[4] <- "ga"
+colnames(host)[5] <- "editions"
+teams_2018 = rbind(teams_2018,host)
+```
+
+
+Until know we have a list of 29 teams selected 
+
+
+Tournamet predictions with Pitagorean Linear Model
+-----------------------------------------------------
+From the several options that have been used for modeling
+
+
+<img src="/Users/edana/Hudl/Pythagorean_theorem.png" alt="HTML5 Icon" style="width:200px;height:200px">
+$Prob(Win) = \frac{GF^2}{GF^2 + GA^2}$
+
+```{r}
+teams_2018$win_prob = (teams_2018$gf*teams_2018$gf)/
+    ((teams_2018$gf*teams_2018$gf) + (teams_2018$ga*teams_2018$ga))
+```
+
+```{r}
+#Randomize the teams
+set.seed(42)
+teams_2018=teams_2018[sample(nrow(teams_2018)),]
+print(teams_2018)
+```
+
+<img src="/Users/edana/Hudl/fifa_2018_prediction.jpg" alt="HTML5 Icon" style="width:800px;height:700px">
+
+
