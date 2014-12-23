@@ -11,3 +11,6 @@ The report can be seen in the markdown file:
 
 The ruby code to process the data is in:
 <https://github.com/edanamerchan/project_Hudl/blob/master/data1.rb>
+
+You can view an interactive plot of the win probabilities for the selected 32 team at 
+<https://plot.ly/~Edana/22>
