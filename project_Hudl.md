@@ -22,7 +22,7 @@ To simplify the problem we are going to consider several assumptions:
 The sorting and win probability shows the champion of the tournament could be Brazil. The confidence of this estimation have to be further considered and can be a long problem. 
 
 
-Data collection and Sorting
+Data collection and sorting
 ------------------------------
 There are a lot of data on the fifa world cup collected, all kinds of information are available for free. We are going to use only the general statistics about cups played, games played, scores of each game, number of cups attended and regions. The data was downloaded from  <https://github.com/footballdata/fifadata>. In particular the 'matches.csv' file.
 
@@ -42,11 +42,11 @@ However, in the 'matches.csv' file the information about the last world cup was 
 - Loser = 0 points 
 - 1 point to each team if tied.    
 
-and is also necesary the number of goals in favor (GF), the goals againts (GA) and the number of participations in each cup.
+and is also necessary the number of goals in favor (GF), the goals against (GA) and the number of participations in each cup.
 
 This information is stored in the file but have to be processed to extract it, this process is much easier to do using a script. I wrote the ruby **data1.rb** script take cares of the organization of the data file and writes the 'cup_stats_full.csv'  
 
-Thera are 32 spots for the 2018 World Cup, the number of available spots depend of the region each contry belongs to, the clasification table is:
+There are 32 spots for the 2018 World Cup, the number of available spots depend of the region each country belongs to, the classification table is:
 
 ```r
 #Clasification table
@@ -67,7 +67,7 @@ print(spots_df)
 ## 6   S.America          4.5
 ```
 
-So the data has to be splited by regions, then sorted to have the teams in each region with the most probablity to be participating. Of course, one big influences of the probability to be in a specific cup can be derived from the preliminary rounds in each region but this can be considered if the project is extended.  
+So the data has to be split by regions, then sorted to have the teams in each region with the most probability to be participating. Of course, one big influences of the probability to be in a specific cup can be derived from the preliminary rounds in each region but this can be considered if the project is extended.  
 
 
 ```r
@@ -81,7 +81,7 @@ data_sAmerica = data[data$region == "S.America",]
 
 In general we want to see how many points a team has won, this depends also on how many cups the team has participated. And gives a clear indication of how good a team does in its cup participations. 
 
-If the points are ploted as a function of the number of cups. There have been a total of 20 cups played. We can clearly see that the have a linear relation as we can see in the plot. The teams that have more participation have collected more points and viceversa the teams wich less participation have colected few points.  
+If the points are plotted as a function of the number of cups. There have been a total of 20 cups played. We can clearly see that the have a linear relation as we can see in the plot. The teams that have more participation have collected more points and viceversa the teams which less participation have collected few points.  
 
 ![plot of chunk unnamed-chunk-4](figure/unnamed-chunk-4.png) 
 
@@ -90,7 +90,7 @@ Analysis per region: Africa
 --------------------------------------------
 
 
-The African teams have has few participations over the years, only since 1998 the region has been asigned 5 spots when the totla number of spots opened to 32 teams. So it is expected that the number of points the countries in this group have are significantly lower than other groups. A quick k-means clustering analysis applied shows two groups the low (1) and high (2) plotted in different colors. Cameroon has the lead followed by Nigeria.  
+The African teams have has few participations over the years, only since 1998 the region has been assigned 5 spots when the total number of spots opened to 32 teams. So it is expected that the number of points the countries in this group have are significantly lower than other groups. A quick k-means clustering analysis applied shows two groups the low (1) and high (2) plotted in different colors. Cameroon has the lead followed by Nigeria.  
 
 
 ```r
@@ -123,7 +123,7 @@ The linear model fits the points, however the confidence interval is wide due to
 Analysis per region: Asia
 --------------------------------------------
 
-The case of Asia is very similar to Africa in the sense that this group has only be assigned 4.5 spots since 2006, so there has been less chances for them to be in the cup. The clusting model does not show any particular separation. The lead team is South Korea with 9 participations. 
+The case of Asia is very similar to Africa in the sense that this group has only be assigned 4.5 spots since 2006, so there has been less chances for them to be in the cup. The clustering model does not show any particular separation. The lead team is South Korea with 9 participations. 
 
 
 ```r
@@ -158,9 +158,9 @@ The linear model fit has a narrow confidence interval and the goodness of the fi
 Analysis per region: Europe
 --------------------------------------------
 
-Europe has the most history on the cup and the most spots but counties as well. Vey important is to remove the countries that have participated in the past but do not exist anymore. Contries like  *Federal Republic of Germany (FRG)*, *German Democratic Republic (GDR)*, *Yugoslavia*, *Czechoslovakia*, *Soviet Union* have to be removed from the data.
+Europe has the most history on the cup and the most spots but counties as well. Very important is to remove the countries that have participated in the past but do not exist anymore. Countries like  *Federal Republic of Germany (FRG)*, *German Democratic Republic (GDR)*, *Yugoslavia*, *Czechoslovakia*, *Soviet Union* have to be removed from the data. Italy is the country with more participations and much more points than the others.
 
-The linear model fit in this case has a good confidence interval
+Since there are several points in this group, I applied the clustering algorithm with 3 center points to distinguish between the countries in the low (1), middle (2) and high (3) parts. 
 
 
 ```r
@@ -201,6 +201,9 @@ The linear model fit has a narrow, also due to the high number of points we have
 Analysis per region: North, Central America and the Caribbean
 --------------------------------------------
 
+This region includes just few countries, the best countries are Mexico and USA. The cluster algorithm shows a clearly this distinction. 
+
+
 ```r
 #Analysis N/C.America
 cluster_ncAmerica <- data.frame(data_ncAmerica[2],data_ncAmerica[3],
@@ -231,9 +234,11 @@ confint(lmfit)
 The linear model fit has a narrow confidence interval and the goodness of the fit is 0.9496.
 
 
-
 Analysis per region: South America
 --------------------------------------------
+
+South america region has the country with the most participations over all, Brazil. In the group there is clearly the ditinction between Brazil and Argentina at the top, using the clustering algotithm. 
+
 
 ```r
 #Analysis S.America
@@ -264,10 +269,9 @@ confint(lmfit)
 
 The linear model fit has a narrow confidence interval and the goodness of the fit is 0.9198.
 
-
-
 Best teams selection
 -------------------------------------------
+From the region analysis we can obtain the top teams that could participate in the 2018 FIFA World Cup. There are specific number of spots assigned per region, however some of the numbers are not integer, what means is that one team from each 4 regions, with residuals 0.5, have the opportunity of get one of the 2 spots left. In this way we get 29 teams from before and now we will select the next 2 teams and finally add Russia to the list of teams competing.
 
 
 ```r
@@ -291,22 +295,30 @@ teams_2018 = rbind(teams_2018,host)
 ```
 
 
-Until know we have a list of 29 teams selected 
 
-
-Tournament predictions with Pythagorean Linear Model
+Tournament prediction with Pythagorean Linear Model
 -----------------------------------------------------
-From the several options that have been used for modeling
 
 
-<img src="./Pythagorean_theorem.png" alt="HTML5 Icon" style="width:50px;height:50px">
-$Prob(Win) = \frac{GF^2}{GF^2 + GA^2}$
+The list of 32 teams is complete. Now we have to see how the tournament will go considering who will win each game. There are several options that have been used for modeling a winning team. It highly depend on the sport and how the scoring is made. Basseball, basketball and Football have very different ways to keep the points. In the other hand, a winner team in soccer is very similar to hokey, where each goal is one point and the team that scores more goals wins. I have used a model Pythagorean Linear Model described for Hokey. <http://www.hockeyanalytics.com/Research_files/Win_Probabilities.pdf>
+
+There are some short commings of this model.
+
+- It does not consider ties. However, for the major part of the World Cup the games have to have a winner and a loser team, so it works for us.
+- There is no parameter to adjust. Which means that is a very rigid model.
+- It anly considers the weight of Goals in Favor (GF) and Goals Against (GA) and no other variable
+
+<img src="./figure/pythagorean.png" alt="HTML5 Icon" style="width600px;height:200px">
+
+The Pytagorean Model gives the probability for a team to win Prob(Win) based on the equation of a Pytagorean triangle as shown in the picture. Appliyng this formula to the data we can get for our selected 32 teams the win probability.
 
 
 ```r
 teams_2018$win_prob = (teams_2018$gf*teams_2018$gf)/
     ((teams_2018$gf*teams_2018$gf) + (teams_2018$ga*teams_2018$ga))
 ```
+
+It is important not to forget to randomize the order of the teams, like the lottery, to group the teams to compete againts each other.  
 
 
 ```r
@@ -351,6 +363,13 @@ print(teams_2018)
 ## 14      Belgium     51  52  66       12  0.38300
 ## 13       France     96 106  71       14  0.69030
 ```
+
+Results
+------------
+
+Based on the calculated win probabilities we can create now the tournamet table. The teams have benn randomly arranged into 8 groups each of 4 teams. The first round each teams has to play 3 games against the other 3 teams of the group. After the team that has won all of the games (remember no ties considered) pass to the second round as the first of the group. Then the team that has won 2 of the games goes to be the second of the group. 
+
+In the second round the first team plays against the second team of another group. Then the winner keeps going until the semifinals where 4 teams dispute the 4rd, 3rd, 2nd and 1st places.
 
 <img src="./fifa_2018_prediction.jpg" alt="HTML5 Icon" style="width:800px;height:700px">
 
