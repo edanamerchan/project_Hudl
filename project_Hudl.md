@@ -199,7 +199,7 @@ Tournamet predictions with Pitagorean Linear Model
 From the several options that have been used for modeling
 
 
-<img src="/Users/edana/Hudl/project_Hudl/Pythagorean_theorem.png" alt="HTML5 Icon" style="width:200px;height:200px">
+<img src="./Pythagorean_theorem.png" alt="HTML5 Icon" style="width:200px;height:200px">
 $Prob(Win) = \frac{GF^2}{GF^2 + GA^2}$
 
 
@@ -252,6 +252,6 @@ print(teams_2018)
 ## 13       France     96 106  71       14  0.69030
 ```
 
-<img src="/Users/edana/Hudl/project_Hudl/fifa_2018_prediction.jpg" alt="HTML5 Icon" style="width:800px;height:700px">
+<img src="./fifa_2018_prediction.jpg" alt="HTML5 Icon" style="width:800px;height:700px">
 
 
