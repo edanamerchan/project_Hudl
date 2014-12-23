@@ -2,6 +2,7 @@
 
 require "csv"
 
+#Create hash tables
 points_cup = Hash.new(0)
 gf_cup = Hash.new(0)
 ga_cup = Hash.new(0)
@@ -17,10 +18,13 @@ all_pre = {}
 
 edition_prev = 1930
 
+#Open the csv output file
 CSV.open("cup_stats_full.csv", "wb") do |csv|
 	csv << ["country", "points", "gf","ga","editions","region"]
 
+#Read and process the input csv file
 CSV.foreach('./matches_full.csv',:headers => true, :col_sep => ',') do |row|
+	#For non empty rows
 	if row[1]
 		edition = row[1].to_s
 		edition = edition.split('-')
@@ -32,10 +36,12 @@ CSV.foreach('./matches_full.csv',:headers => true, :col_sep => ',') do |row|
 	#Count the number of participations	
 	next unless row[0]
 
+	# Read the score string and split it
 	round = row[2].to_s
 	score = row[3].to_s
 	score = score.split(' ')[0].split('-')
 
+	#Read the team name
 	team1_score = score[0].to_i
 	team2_score = score[1].to_i
 

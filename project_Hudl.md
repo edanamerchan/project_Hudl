@@ -237,7 +237,7 @@ The linear model fit has a narrow confidence interval and the goodness of the fi
 Analysis per region: South America
 --------------------------------------------
 
-South america region has the country with the most participations over all, Brazil. In the group there is clearly the ditinction between Brazil and Argentina at the top, using the clustering algotithm. 
+South america region has the country with the most participations over all, Brazil. In the group there is clearly the distinction between Brazil and Argentina at the top, using the clustering algorithm. 
 
 
 ```r
@@ -300,17 +300,17 @@ Tournament prediction with Pythagorean Linear Model
 -----------------------------------------------------
 
 
-The list of 32 teams is complete. Now we have to see how the tournament will go considering who will win each game. There are several options that have been used for modeling a winning team. It highly depend on the sport and how the scoring is made. Basseball, basketball and Football have very different ways to keep the points. In the other hand, a winner team in soccer is very similar to hokey, where each goal is one point and the team that scores more goals wins. I have used a model Pythagorean Linear Model described for Hokey. <http://www.hockeyanalytics.com/Research_files/Win_Probabilities.pdf>
+The list of 32 teams is complete. Now we have to see how the tournament will go considering who will win each game. There are several options that have been used for modeling a winning team. It highly depend on the sport and how the scoring is made. Baseball, basketball and Football have very different ways to keep the points. In the other hand, a winner team in soccer is very similar to hokey, where each goal is one point and the team that scores more goals wins. I have used a model Pythagorean Linear Model described for Hokey. <http://www.hockeyanalytics.com/Research_files/Win_Probabilities.pdf>
 
-There are some short commings of this model.
+There are some short comings of this model.
 
 - It does not consider ties. However, for the major part of the World Cup the games have to have a winner and a loser team, so it works for us.
 - There is no parameter to adjust. Which means that is a very rigid model.
-- It anly considers the weight of Goals in Favor (GF) and Goals Against (GA) and no other variable
+- It only considers the weight of Goals in Favor (GF) and Goals Against (GA) and no other variable
 
 <img src="./figure/pythagorean.png" alt="HTML5 Icon" style="width600px;height:200px">
 
-The Pytagorean Model gives the probability for a team to win Prob(Win) based on the equation of a Pytagorean triangle as shown in the picture. Appliyng this formula to the data we can get for our selected 32 teams the win probability.
+The Pythagorean Model gives the probability for a team to win Prob(Win) based on the equation of a Pythagorean triangle as shown in the picture. Applying this formula to the data we can get for our selected 32 teams the win probability.
 
 
 ```r
@@ -318,7 +318,7 @@ teams_2018$win_prob = (teams_2018$gf*teams_2018$gf)/
     ((teams_2018$gf*teams_2018$gf) + (teams_2018$ga*teams_2018$ga))
 ```
 
-It is important not to forget to randomize the order of the teams, like the lottery, to group the teams to compete againts each other.  
+It is important not to forget to randomize the order of the teams, like the lottery, to group the teams to compete against each other.  
 
 
 ```r
@@ -367,7 +367,7 @@ print(teams_2018)
 Results
 ------------
 
-Based on the calculated win probabilities we can create now the tournamet table. The teams have benn randomly arranged into 8 groups each of 4 teams. The first round each teams has to play 3 games against the other 3 teams of the group. After the team that has won all of the games (remember no ties considered) pass to the second round as the first of the group. Then the team that has won 2 of the games goes to be the second of the group. 
+Based on the calculated win probabilities we can create now the tournament table. The teams have been randomly arranged into 8 groups each of 4 teams. The first round each teams has to play 3 games against the other 3 teams of the group. After the team that has won all of the games (remember no ties considered) pass to the second round as the first of the group. Then the team that has won 2 of the games goes to be the second of the group. 
 
 In the second round the first team plays against the second team of another group. Then the winner keeps going until the semifinals where 4 teams dispute the 4rd, 3rd, 2nd and 1st places.
 
