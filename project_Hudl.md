@@ -1,28 +1,30 @@
 ---
-title: "Simple 2018 FIFA World Cup forecasting"
+title: "Simple 2018 FIFA World Cup Forecasting"
 author: "Edana Merchan"
 date: "December, 2014"
-output: pdf_document
+output: html_document
 ---
 
 Summary
 ------------------
 
-The aim of this project is to predict which countries are going to participate in the 2018 FIFA World Cup. And them by using a simple pitagorean model predict how will the tournament will 
-unfold.
+The aim of this project is to predict which countries are going to participate in the 2018 FIFA World Cup. Considering 32 teams including the host (Russia).  Also to sort them by using a simple Pythagorean model to predict how the tournament will unfold.
 
 To simplify the problem we are going to consider several assumptions:
  
-- Data collected from statistics of the 20 world cups only. Preliminary rounds should be consider to produce a better model but this surpases the aim of this project.
+- Data collected from statistics of the 20 world cups only. Preliminary rounds should be consider to produce a better model but this surpasses the aim of this project.
 - As is done in real live we are going to give points for each game played. This will provide 
-  us with a weithed variable "points", which will have information of how many games each team 
+  us with a weighed variable "points", which will have information of how many games each team 
   has won a game.
-    - Winner = 3 points 
-    - Loser = 0 points 
-    - 1 point to each team if tied.
-- The clasification spots have changed over time, we are going to consider 32 teams in the clasification from the 6 different regions as is currently done. 
+- The classification spots have changed over time, we are going to consider 32 teams in the classification from the 6 different regions distributed as is currently done. 
+- We have to include Russia since it is the host country.
 
-Since the 2018 FIFA World Cup will be held in Russia, 
+The sorting and win probability shows the champion of the tournament could be Brazil. The confidence of this estimation have to be further considered and can be a long problem. 
+
+
+Data collection and Sorting
+------------------------------
+There are a lot of data on the fifa world cup collected, all kinds of information are available for free. We are going to use only the general statistics about cups played, games played, scores of each game, number of cups attended and regions. The data was downloaded from  <https://github.com/footballdata/fifadata>. In particular the 'matches.csv' file.
 
 
 ```r
@@ -32,14 +34,21 @@ data<-read.csv("/Users/edana/Hudl/project_Hudl/fifadata/cup_stats_full.csv",
 #Wrong values
 data$region[25] = "Asia"
 data$region[2] = "N/C.America"
+```
 
-data_africa = data[data$region == "Africa",]
-data_asia = data[data$region == "Asia",]
-data_europe = data[data$region == "Europe",]
-data_ncAmerica = data[data$region == "N/C.America",]
-data_oceania = data[data$region == "Oceania",]
-data_sAmerica = data[data$region == "S.America",]
+However, in the 'matches.csv' file the information about the last world cup was missing, so the first step was to include all the information left out in the 'matches_full.csv'. With the information complete and correct, the data can be sorted to obtain useful information. The values needed are the points, 
 
+- Winner = 3 points 
+- Loser = 0 points 
+- 1 point to each team if tied.    
+
+and is also necesary the number of goals in favor (GF), the goals againts (GA) and the number of participations in each cup.
+
+This information is stored in the file but have to be processed to extract it, this process is much easier to do using a script. I wrote the ruby **data1.rb** script take cares of the organization of the data file and writes the 'cup_stats_full.csv'  
+
+Thera are 32 spots for the 2018 World Cup, the number of available spots depend of the region each contry belongs to, the clasification table is:
+
+```r
 #Clasification table
 regions <- unique(data$region)
 regions <- regions[order(regions)]
@@ -58,15 +67,30 @@ print(spots_df)
 ## 6   S.America          4.5
 ```
 
-You can also embed plots, for example:
+So the data has to be splited by regions, then sorted to have the teams in each region with the most probablity to be participating. Of course, one big influences of the probability to be in a specific cup can be derived from the preliminary rounds in each region but this can be considered if the project is extended.  
 
-![plot of chunk unnamed-chunk-2](figure/unnamed-chunk-2.png) 
 
-Note that the `echo = FALSE` parameter was added to the code chunk to prevent printing of the R code that generated the plot.
+```r
+data_africa = data[data$region == "Africa",]
+data_asia = data[data$region == "Asia",]
+data_europe = data[data$region == "Europe",]
+data_ncAmerica = data[data$region == "N/C.America",]
+data_oceania = data[data$region == "Oceania",]
+data_sAmerica = data[data$region == "S.America",]
+```
+
+In general we want to see how many points a team has won, this depends also on how many cups the team has participated. And gives a clear indication of how good a team does in its cup participations. 
+
+If the points are ploted as a function of the number of cups. There have been a total of 20 cups played. We can clearly see that the have a linear relation as we can see in the plot. The teams that have more participation have collected more points and viceversa the teams wich less participation have colected few points.  
+
+![plot of chunk unnamed-chunk-4](figure/unnamed-chunk-4.png) 
+
 
 Analysis per region: Africa
 --------------------------------------------
 
+
+The African teams have has few participations over the years, only since 1998 the region has been asigned 5 spots when the totla number of spots opened to 32 teams. So it is expected that the number of points the countries in this group have are significantly lower than other groups. A quick k-means clustering analysis applied shows two groups the low (1) and high (2) plotted in different colors. Cameroon has the lead followed by Nigeria.  
 
 
 ```r
@@ -81,11 +105,26 @@ qplot(editions,points, data = data_africa, col = kmeans.result$cluster) +
     stat_smooth(method="lm", se=TRUE)
 ```
 
-![plot of chunk unnamed-chunk-4](figure/unnamed-chunk-4.png) 
+![plot of chunk unnamed-chunk-6](figure/unnamed-chunk-6.png) 
 
+```r
+lmfit <- lm(data_africa$editions ~ data_africa$points)
+confint(lmfit)
+```
+
+```
+##                      2.5 % 97.5 %
+## (Intercept)        -0.1678 1.9695
+## data_africa$points  0.1412 0.3418
+```
+
+The linear model fits the points, however the confidence interval is wide due to big variations the goodness of the fit is 0.7184
 
 Analysis per region: Asia
 --------------------------------------------
+
+The case of Asia is very similar to Africa in the sense that this group has only be assigned 4.5 spots since 2006, so there has been less chances for them to be in the cup. The clusting model does not show any particular separation. The lead team is South Korea with 9 participations. 
+
 
 ```r
 #Analysis Asia
@@ -100,10 +139,29 @@ qplot(editions,points, data = data_asia, col = kmeans.result$cluster) +
     stat_smooth(method="lm", se=TRUE)
 ```
 
-![plot of chunk unnamed-chunk-5](figure/unnamed-chunk-5.png) 
+![plot of chunk unnamed-chunk-8](figure/unnamed-chunk-8.png) 
+
+```r
+lmfit <- lm(data_asia$editions ~ data_asia$points)
+confint(lmfit)
+```
+
+```
+##                   2.5 % 97.5 %
+## (Intercept)      0.5397 1.5462
+## data_asia$points 0.2646 0.3686
+```
+
+The linear model fit has a narrow confidence interval and the goodness of the fit is 0.9547.
+
 
 Analysis per region: Europe
 --------------------------------------------
+
+Europe has the most history on the cup and the most spots but counties as well. Vey important is to remove the countries that have participated in the past but do not exist anymore. Contries like  *Federal Republic of Germany (FRG)*, *German Democratic Republic (GDR)*, *Yugoslavia*, *Czechoslovakia*, *Soviet Union* have to be removed from the data.
+
+The linear model fit in this case has a good confidence interval
+
 
 ```r
 #Analysis Europe
@@ -123,10 +181,24 @@ qplot(editions,points, data = data_europe, col = kmeans.result$cluster) +
     stat_smooth(method="lm", se=TRUE)
 ```
 
-![plot of chunk unnamed-chunk-6](figure/unnamed-chunk-6.png) 
+![plot of chunk unnamed-chunk-10](figure/unnamed-chunk-10.png) 
+
+```r
+lmfit <- lm(data_europe$editions ~ data_europe$points)
+confint(lmfit)
+```
+
+```
+##                      2.5 % 97.5 %
+## (Intercept)        1.01578 2.9462
+## data_europe$points 0.09352 0.1303
+```
+
+The linear model fit has a narrow, also due to the high number of points we have for this regions. The confidence interval and the goodness of the fit is 0.8323.
 
 
-Analysis per region: North, Central America and the Caribean
+
+Analysis per region: North, Central America and the Caribbean
 --------------------------------------------
 
 ```r
@@ -143,7 +215,21 @@ qplot(editions,points, data = data_ncAmerica, col = kmeans.result$cluster) +
     stat_smooth(method="lm", se=TRUE)
 ```
 
-![plot of chunk unnamed-chunk-7](figure/unnamed-chunk-7.png) 
+![plot of chunk unnamed-chunk-12](figure/unnamed-chunk-12.png) 
+
+```r
+lmfit <- lm(data_ncAmerica$editions ~ data_ncAmerica$points)
+confint(lmfit)
+```
+
+```
+##                          2.5 % 97.5 %
+## (Intercept)           -0.04378 1.9547
+## data_ncAmerica$points  0.20441 0.2989
+```
+
+The linear model fit has a narrow confidence interval and the goodness of the fit is 0.9496.
+
 
 
 Analysis per region: South America
@@ -163,7 +249,21 @@ qplot(editions,points, data = data_sAmerica, col = kmeans.result$cluster) +
     stat_smooth(method="lm", se=TRUE)
 ```
 
-![plot of chunk unnamed-chunk-8](figure/unnamed-chunk-8.png) 
+![plot of chunk unnamed-chunk-14](figure/unnamed-chunk-14.png) 
+
+```r
+lmfit <- lm(data_sAmerica$editions ~ data_sAmerica$points)
+confint(lmfit)
+```
+
+```
+##                       2.5 %  97.5 %
+## (Intercept)          2.1463 5.99417
+## data_sAmerica$points 0.0565 0.09701
+```
+
+The linear model fit has a narrow confidence interval and the goodness of the fit is 0.9198.
+
 
 
 Best teams selection
@@ -194,12 +294,12 @@ teams_2018 = rbind(teams_2018,host)
 Until know we have a list of 29 teams selected 
 
 
-Tournamet predictions with Pitagorean Linear Model
+Tournament predictions with Pythagorean Linear Model
 -----------------------------------------------------
 From the several options that have been used for modeling
 
 
-<img src="./Pythagorean_theorem.png" alt="HTML5 Icon" style="width:200px;height:200px">
+<img src="./Pythagorean_theorem.png" alt="HTML5 Icon" style="width:50px;height:50px">
 $Prob(Win) = \frac{GF^2}{GF^2 + GA^2}$
 
 
